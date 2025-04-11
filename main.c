@@ -8,15 +8,7 @@
 #define BLEU    "\033[1;36m"
 #define RESET   "\033[0m"
 
-typedef struct {
-    char* nom;
-    int pv;
-    int att;
-    int def;
-    int speed;
-    int dodge;
-    int crit;
-} Personnage;
+
 
 Personnage persos[12] = {
     {"(1) Luffy", 2, 4, 3, 2, 4, 4},
