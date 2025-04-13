@@ -26,20 +26,7 @@ void afficherTitre() {
     while (getchar() != '\n');
 }
 
-int demanderChoix(const char *texte ) {
-    int choix = 0;
-    char ligne[10];
 
-    do {
-        printf(JAUNE "%s (1 ou 2) : " RESET, texte);
-        if (fgets(ligne, sizeof(ligne), stdin)) {
-            if (sscanf(ligne, "%d", &choix) == 1 && (choix == 1 || choix == 2)) {
-                return choix;
-            }
-        }
-        printf(ROUGE "Choix incorrect, rechoisis\n" RESET);
-    } while (1);
-}
 
 void afficherMenu(int *mode , int *nbr_joueur) {
     system("clear");
@@ -156,10 +143,15 @@ void choix_joueur(int *equipe1, int *equipe2, int nbr_joueur , int mode) {
 
     printf("\n👥  EQUIPE 2, c’est à votre tour :\n");
     choix_joueur_E(equipe2, nbr_joueur);
+    break;
         case 2 : //  PVE
         
         printf("\n👥  EQUIPE 1, c’est à votre tour :\n");
     choix_joueur_E(equipe1, nbr_joueur);
+    break;
+    default:
+                printf("Erreur : nombre de personnages non supporté\n");
+                exit(1);
     
         // a voir pour le choix de l equipe du bot ...
     }
