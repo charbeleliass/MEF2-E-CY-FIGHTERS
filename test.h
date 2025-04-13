@@ -33,7 +33,7 @@ typedef struct{
 
 typedef enum{Bouclier, Epee, Mitraillette, Baton, Medkit ,Eclair , None}Assets; // enumeration des assets
 
- // declaration des joueurs
+ // declaration des joueurs ( a chager par les files ) 
 Player p1 = {"luffy" , 70 , PVMAX, 0.3 , 7 , 2 , 0.4 , ENNERGY , "Gum Gum no Gum Gum" , 1.4 , 2 , "Gear 5" , 1.8 , 4 };
 Player p2 = {"sanji", 60, PVMAX, 0.4, 8, 3, 0.2, ENNERGY, "diabolo jumbo", 1.2, 2, "bien cuit grill shot", 1.4, 4};
 Player p3 = {"zoro", 80, PVMAX, 0.1, 7, 4, 0.3, ENNERGY, "tiger slash", 1.1, 2, "oni giri", 1.2, 4};
@@ -97,7 +97,7 @@ typedef struct {
     int crit;
 } Personnage;
 
-Personnage persos[12] = {
+Personnage persos[12] = {  //pour l affichage 
     {"(1)  Luffy", 2, 4, 3, 2, 4, 4},
     {"(2)  Sanji", 1, 5, 4, 3, 2, 2},
     {"(3)  Zoro", 3, 4, 1, 4, 3, 1},
@@ -121,6 +121,21 @@ int demanderChoixDansIntervalle(const char *texte, int min, int max, const char 
         printf("%s%s (%d à %d) : " RESET, couleur, texte, min, max);
         if (fgets(ligne, sizeof(ligne), stdin)) {
             if (sscanf(ligne, "%d", &choix) == 1 && choix >= min && choix <= max) {
+                return choix;
+            }
+        }
+        printf(ROUGE "Choix incorrect, rechoisis\n" RESET);
+    } while (1);
+}
+
+int demanderChoix(const char *texte ) {
+    int choix = 0;
+    char ligne[10];
+
+    do {
+        printf(JAUNE "%s (1 ou 2) : " RESET, texte);
+        if (fgets(ligne, sizeof(ligne), stdin)) {
+            if (sscanf(ligne, "%d", &choix) == 1 && (choix == 1 || choix == 2)) {
                 return choix;
             }
         }
