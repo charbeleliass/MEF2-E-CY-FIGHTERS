@@ -86,3 +86,44 @@ void atout(Player* p,Assets a){ // fonction qui permet de choisir un atout et qu
     }
       
 }
+
+typedef struct {
+    char* nom;
+    int pv;
+    int att;
+    int def;
+    int speed;
+    int dodge;
+    int crit;
+} Personnage;
+
+Personnage persos[12] = {
+    {"(1)  Luffy", 2, 4, 3, 2, 4, 4},
+    {"(2)  Sanji", 1, 5, 4, 3, 2, 2},
+    {"(3)  Zoro", 3, 4, 1, 4, 3, 1},
+    {"(4)  Ace", 4, 2, 3, 1, 5, 2},
+    {"(5)  Brook", 2, 2, 4, 4, 3, 2},
+    {"(6)  Ussop", 3, 2, 3, 3, 4, 1},
+    {"(7)  Do Flamingo", 1, 2, 4, 5, 3, 2},
+    {"(8)  Big Mom", 3, 3, 3, 1, 5, 3},
+    {"(9)  Katakuri", 3, 5, 4, 1, 2, 3},
+    {"(10) Black Beard", 3, 4, 1, 4, 3, 4},
+    {"(11) Crocodile", 1, 1, 5, 5, 3, 2},
+    {"(12) Kaido", 4, 5, 3, 4, 2, 4}
+};
+
+
+int demanderChoixDansIntervalle(const char *texte, int min, int max, const char *couleur) {
+    int choix = 0;
+    char ligne[10];
+
+    do {
+        printf("%s%s (%d à %d) : " RESET, couleur, texte, min, max);
+        if (fgets(ligne, sizeof(ligne), stdin)) {
+            if (sscanf(ligne, "%d", &choix) == 1 && choix >= min && choix <= max) {
+                return choix;
+            }
+        }
+        printf(ROUGE "Choix incorrect, rechoisis\n" RESET);
+    } while (1);
+}
