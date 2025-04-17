@@ -3,7 +3,7 @@
 #include "menu.h"
 #include "structure.h"
 #include "choix.h"
-#include "combat.h
+#include "combat.h"
 
 #define ROUGE   "\033[1;31m"
 #define VERT    "\033[1;32m"
