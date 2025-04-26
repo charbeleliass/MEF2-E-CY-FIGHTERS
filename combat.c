@@ -138,7 +138,7 @@ void afficher_etat_combat(Player eq1[], Player eq2[], int joueur_actuel, int equ
     }
     printf("\n");
 
-    // Effets spéciaux en cours
+    // effet speciaux
     for (int i = 0; i <= nbr_joueur; i++) {
         printf("[ ");
         if (eq1[i].tour_buff_restant > 0) {
@@ -224,10 +224,10 @@ void attaque_classique(Player* attaquant, Player ennemis[], int nbr_joueur) {
 
     float degats = attaquant->stats_temp.att * 5;
 
-    // Réduction par la défense
+
     degats *= (1 - ennemis[cible].stats_temp.def);
 
-    // Chance d'esquive
+
     if (((float)rand() / RAND_MAX) < ennemis[cible].stats_temp.dodge) {
         printf("%s esquive l'attaque !\n", ennemis[cible].name);
         return;
@@ -276,11 +276,9 @@ void combat(Player eq1_stats[], Player eq2_stats[], int nbr_joueur) {
 
             for (int i = 0; i <= nbr_joueur; i++) {
                 if (equipe[i].stats_temp.pv > 0) {
-
-                    // === NOUVEL AFFICHAGE ICI ===
+                    
                     afficher_etat_combat(eq1_stats, eq2_stats, i, e, nbr_joueur);
 
-                    // === Début du tour du joueur ===
                     printf("\nC'est au tour de %s\n", equipe[i].name);
                     printf("1 - Attaque classique\n");
                     printf("2 - Utiliser compétence spéciale\n");
@@ -299,7 +297,6 @@ void combat(Player eq1_stats[], Player eq2_stats[], int nbr_joueur) {
             }
         }
 
-        // Vérifier si une équipe est KO
         if (equipe_KO(eq1_stats, nbr_joueur)) {
             printf("\n=== L'équipe 1 est K.O. ===\nÉQUIPE 2 GAGNE !\n");
             break;
