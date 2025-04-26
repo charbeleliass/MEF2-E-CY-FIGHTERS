@@ -109,16 +109,79 @@ void choix_assets_E(int equipe1[], int equipe2[], int nbr_joueur, Player eq1_sta
     printf("Au tour de l'équipe 2 :\n");
     choix_assets(equipe2, nbr_joueur, eq2_stats);
 }
-void afficher_equipes(Player eq1_stats[], Player eq2_stats[], int nbr_joueur) {
-    printf("\nEQUIPE 1 :\n");
-    for (int i = 0; i <= nbr_joueur; i++) {
-        printf("[ %-15s ] PV : %.0f/%.0f\n", eq1_stats[i].name, eq1_stats[i].stats_temp.pv, eq1_stats[i].stats_temp.pv_max);
-    }
+void afficher_etat_combat(Player eq1[], Player eq2[], int joueur_actuel, int equipe_joueur, int nbr_joueur) {
+    system("clear"); // Effacer l'écran avant d'afficher
 
-    printf("\nEQUIPE 2 :\n");
+    printf(BLEU "_[EQUIPE 1]_____________________________________________________________\n" RESET);
     for (int i = 0; i <= nbr_joueur; i++) {
-        printf("[ %-15s ] PV : %.0f/%.0f\n", eq2_stats[i].name, eq2_stats[i].stats_temp.pv, eq2_stats[i].stats_temp.pv_max);
+        // Vérifier si joueur KO
+        if (eq1[i].stats_temp.pv <= 0) {
+            printf("[ " ROUGE "%-10s |✠|" RESET "]", eq1[i].name);
+        }
+        else {
+            if (equipe_joueur == 0 && i == joueur_actuel) {
+                printf("[ " JAUNE ")>%s<(" RESET "]", eq1[i].name);
+            } else {
+                printf("[ " VERT "%-10s |%d|" RESET "]", eq1[i].name, i+1);
+            }
+        }
     }
+    printf("\n");
+
+    // Barres de vie
+    for (int i = 0; i <= nbr_joueur; i++) {
+        printf("[");
+        int pv_ratio = (int)((eq1[i].stats_temp.pv / eq1[i].stats_temp.pv_max) * 20); // sur 20 caractères
+        for (int j = 0; j < pv_ratio; j++) printf("#");
+        for (int j = pv_ratio; j < 20; j++) printf(" ");
+        printf("]");
+    }
+    printf("\n");
+
+    // Effets spéciaux en cours
+    for (int i = 0; i <= nbr_joueur; i++) {
+        printf("[ ");
+        if (eq1[i].tour_buff_restant > 0) {
+            printf(BLEU "> Effet actif (%d tour(s))" RESET, eq1[i].tour_buff_restant);
+        }
+        printf(" ]");
+    }
+    printf("\n");
+
+    printf(BLEU "_[EQUIPE 2]_____________________________________________________________\n" RESET);
+    for (int i = 0; i <= nbr_joueur; i++) {
+        if (eq2[i].stats_temp.pv <= 0) {
+            printf("[ " ROUGE "%-10s |✠|" RESET "]", eq2[i].name);
+        }
+        else {
+            if (equipe_joueur == 1 && i == joueur_actuel) {
+                printf("[ " JAUNE ")>%s<(" RESET "]", eq2[i].name);
+            } else {
+                printf("[ " VERT "%-10s |%d|" RESET "]", eq2[i].name, i+1);
+            }
+        }
+    }
+    printf("\n");
+
+    // Barres de vie
+    for (int i = 0; i <= nbr_joueur; i++) {
+        printf("[");
+        int pv_ratio = (int)((eq2[i].stats_temp.pv / eq2[i].stats_temp.pv_max) * 20);
+        for (int j = 0; j < pv_ratio; j++) printf("#");
+        for (int j = pv_ratio; j < 20; j++) printf(" ");
+        printf("]");
+    }
+    printf("\n");
+
+    // Effets spéciaux en cours
+    for (int i = 0; i <= nbr_joueur; i++) {
+        printf("[ ");
+        if (eq2[i].tour_buff_restant > 0) {
+            printf(BLEU "> Effet actif (%d tour(s))" RESET, eq2[i].tour_buff_restant);
+        }
+        printf(" ]");
+    }
+    printf("\n");
 
     printf("\n");
 }
@@ -206,7 +269,6 @@ void combat(Player eq1_stats[], Player eq2_stats[], int nbr_joueur) {
 
     while (1) {
         printf("\n========== TOUR %d ==========\n", tour);
-        afficher_equipes(eq1_stats, eq2_stats, nbr_joueur);
 
         for (int e = 0; e <= 1; e++) {
             Player* equipe = (e == 0) ? eq1_stats : eq2_stats;
@@ -214,6 +276,11 @@ void combat(Player eq1_stats[], Player eq2_stats[], int nbr_joueur) {
 
             for (int i = 0; i <= nbr_joueur; i++) {
                 if (equipe[i].stats_temp.pv > 0) {
+
+                    // === NOUVEL AFFICHAGE ICI ===
+                    afficher_etat_combat(eq1_stats, eq2_stats, i, e, nbr_joueur);
+
+                    // === Début du tour du joueur ===
                     printf("\nC'est au tour de %s\n", equipe[i].name);
                     printf("1 - Attaque classique\n");
                     printf("2 - Utiliser compétence spéciale\n");
@@ -232,6 +299,7 @@ void combat(Player eq1_stats[], Player eq2_stats[], int nbr_joueur) {
             }
         }
 
+        // Vérifier si une équipe est KO
         if (equipe_KO(eq1_stats, nbr_joueur)) {
             printf("\n=== L'équipe 1 est K.O. ===\nÉQUIPE 2 GAGNE !\n");
             break;
@@ -245,28 +313,3 @@ void combat(Player eq1_stats[], Player eq2_stats[], int nbr_joueur) {
     }
 }
 
-/*
-void stats_combat_E(Player eq_stats[], int nbr_joueur){
-    for (int i = 0; i <= nbr_joueur; i++) {
-        printf("[ %-20s ]", eq_stats[i].name);
-    }
-    printf("\n");
-
-    for (int j = 0; j <= nbr_joueur; j++) {
-        printf("[ ");
-        for (int k = 0; k < eq_stats[j].stats_temp.pv; k++) {
-            printf(">");
-        }
-        for (int x = 0; x < (eq_stats[j].stats_temp.pv_max - eq_stats[j].stats_temp.pv); x++) {
-            printf(" ");
-        }
-        printf(" ] ");
-    }
-}
-
-void debut_combat(Player eq1_stats[], Player eq2_stats[], int nbr_joueur) {
-    stats_combat_E(eq1_stats, nbr_joueur);
-    printf("\n\n_________________________________________________________________________________________\n\n");
-    stats_combat_E(eq2_stats, nbr_joueur);
-}
-*/
