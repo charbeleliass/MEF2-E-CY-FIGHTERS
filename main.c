@@ -40,6 +40,8 @@ int main() {
 
     choix_assets_E(equipe1, equipe2, nbr_joueur, eq1_stats, eq2_stats);
 
+    combat(eq1_stats, eq2_stats, nbr_joueur);
+    
     return 0;
 }
 
