@@ -59,7 +59,6 @@ void choix_joueur(int *equipe1, int *equipe2, int nbr_joueur , int mode) {
         case 2:
             printf("\n👥  EQUIPE 1, c’est à votre tour :\n");
             choix_joueur_E(equipe1, nbr_joueur);
-            // IA à implémenter ici
             break;
         default:
             printf("Erreur : mode non supporté\n");
