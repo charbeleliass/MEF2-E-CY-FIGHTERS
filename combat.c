@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "combat.h"
 #include "structure.h"
 #include "choix.h"
