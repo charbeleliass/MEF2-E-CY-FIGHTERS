@@ -16,7 +16,7 @@ choix.o: choix.c structure.h
 	gcc -c choix.c -o choix.o
        
 exec: main.o menu.o combat.o choix.o structure.o
-	gcc main.o menu.o combat.o choix.o -o exec  
+	gcc main.o menu.o combat.o choix.o structure.o -o exec  
        
 clean:
 	rm -f *.o
