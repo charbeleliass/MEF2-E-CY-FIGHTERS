@@ -1,33 +1,90 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "structure.h"
 
-Player p[12] = {
-  {"luffy", {70, PVMAX, 0.3, 7, 2, 0.4}, {70, PVMAX, 0.3, 7, 2, 0.4}, {"Gum Gum no Gum Gum", 1.4, "", 2, 0, {0, 0, 0, 0, 0}}, 0},
-  {"sanji", {60, PVMAX, 0.4, 8, 3, 0.2}, {60, PVMAX, 0.4, 8, 3, 0.2}, {"diabolo jumbo", 1.2, "", 2, 0, {0, 0, 0, 0, 0}}, 0},
-  {"zoro", {80, PVMAX, 0.1, 7, 4, 0.3}, {80, PVMAX, 0.1, 7, 4, 0.3}, {"tiger slash", 1.1, "", 2, 0, {0, 0, 0, 0, 0}}, 0},
-  {"ace", {90, PVMAX, 0.3, 5, 1, 0.5}, {90, PVMAX, 0.3, 5, 1, 0.5}, {"Flame fence", 1.2, "", 1, 0, {0, 0, 0, 0, 0}}, 0},
-  {"brook", {70, PVMAX, 0.4, 5, 4, 0.3}, {70, PVMAX, 0.4, 5, 4, 0.3}, {"Song slash", 1.2, "", 3, 0, {0, 0, 0, 0, 0}}, 0},
-  {"ussop", {80, PVMAX, 0.3, 5, 3, 0.4}, {80, PVMAX, 0.3, 5, 3, 0.4}, {"Skull bomb blast", 1.1, "", 1, 0, {0, 0, 0, 0, 0}}, 0},
-  {"do flamingo", {60, PVMAX, 0.4, 5, 5, 0.3}, {60, PVMAX, 0.4, 5, 5, 0.3}, {"Fallbright", 1.2, "", 2, 0, {0, 0, 0, 0, 0}}, 0},
-  {"big mom", {80, PVMAX, 0.3, 6, 1, 0.5}, {80, PVMAX, 0.3, 6, 1, 0.5}, {"Master cannon", 1.3, "", 1, 0, {0, 0, 0, 0, 0}}, 0},
-  {"katakuri", {80, PVMAX, 0.4, 8, 1, 0.2}, {80, PVMAX, 0.4, 8, 1, 0.2}, {"Mochi hadan", 1.3, "", 3, 0, {0, 0, 0, 0, 0}}, 0},
-  {"black beard", {80, PVMAX, 0.1, 7, 4, 0.3}, {80, PVMAX, 0.1, 7, 4, 0.3}, {"Black hole", 1.4, "", 2, 0, {0, 0, 0, 0, 0}}, 0},
-  {"crocodile", {60, PVMAX, 0.5, 4, 5, 0.3}, {60, PVMAX, 0.5, 4, 5, 0.3}, {"Desert spada", 1.2, "", 3, 0, {0, 0, 0, 0, 0}}, 0},
-  {"Kaido", {90, PVMAX, 0.3, 8, 4, 0.2}, {90, PVMAX, 0.3, 8, 4, 0.2}, {"Thunder", 1.4, "", 2, 0, {0, 0, 0, 0, 0}}, 0}
-};
+#define MAX_LIGNE 256
 
-AffichagePerso persos_affichage[12] = {
-    {"(1)  Luffy", 2, 4, 3, 2, 4, 4},
-    {"(2)  Sanji", 1, 5, 4, 3, 2, 2},
-    {"(3)  Zoro", 3, 4, 1, 4, 3, 1},
-    {"(4)  Ace", 4, 2, 3, 1, 5, 2},
-    {"(5)  Brook", 2, 2, 4, 4, 3, 2},
-    {"(6)  Ussop", 3, 2, 3, 3, 4, 1},
-    {"(7)  Do Flamingo", 1, 2, 4, 5, 3, 2},
-    {"(8)  Big Mom", 3, 3, 3, 1, 5, 3},
-    {"(9)  Katakuri", 3, 5, 4, 1, 2, 3},
-    {"(10) Black Beard", 3, 4, 1, 4, 3, 4},
-    {"(11) Crocodile", 1, 1, 5, 5, 3, 2},
-    {"(12) Kaido", 4, 5, 3, 4, 2, 4}
-};
+// Chargement des personnages depuis personnages.txt
+void chargerPersonnages(Player persos[], int taille) {
+    FILE *f = fopen("personnages.txt", "r");
+    if (!f) {
+        perror("Erreur ouverture personnages.txt");
+        exit(1);
+    }
+
+    char ligne[MAX_LIGNE];
+    fgets(ligne, MAX_LIGNE, f); // Ignore l'en-tête
+
+    for (int i = 0; i < taille; i++) {
+        if (fgets(ligne, MAX_LIGNE, f)) {
+            char nom[50];
+            int pv, att, speed, crit;
+            float def, dodge;
+
+            sscanf(ligne, "%[^;];%d;%d;%f;%d;%f;%d", nom, &pv, &att, &def, &speed, &dodge, &crit);
+
+            persos[i].name = strdup(nom);
+            persos[i].stats.pv = pv;
+            persos[i].stats.pv_max = PVMAX;
+            persos[i].stats.att = att;
+            persos[i].stats.def = def;
+            persos[i].stats.speed = speed;
+            persos[i].stats.dodge = dodge;
+            persos[i].stats_temp = persos[i].stats;
+            persos[i].tour_buff_restant = 0;
+        }
+    }
+
+    fclose(f);
+}
+
+// Chargement des techniques depuis techniques.txt
+void chargerTechniques(Player persos[], int taille) {
+    FILE *f = fopen("techniques.txt", "r");
+    if (!f) {
+        perror("Erreur ouverture techniques.txt");
+        exit(1);
+    }
+
+    char ligne[MAX_LIGNE];
+    fgets(ligne, MAX_LIGNE, f); // Ignore l'en-tête
+
+    for (int i = 0; i < taille; i++) {
+        if (fgets(ligne, MAX_LIGNE, f)) {
+            char nom[50], effet[20], description[200];
+            float valeur;
+            int tours, recharge;
+
+            sscanf(ligne, "%[^;];%f;%[^;];\"%[^\"]\";%d;%d", nom, &valeur, effet, description, &tours, &recharge);
+
+            persos[i].atk_spe.name = strdup(nom);
+            persos[i].atk_spe.valeur = valeur;
+            strncpy(persos[i].atk_spe.description, description, sizeof(persos[i].atk_spe.description));
+            persos[i].atk_spe.tour_actif = tours;
+            persos[i].atk_spe.recharge = recharge;
+
+            // Stocke le type d'effet sous forme de chaîne (ex: "pv+", "aoe", etc.)
+            strncpy(persos[i].atk_spe.effet_type, effet, sizeof(persos[i].atk_spe.effet_type));
+        }
+    }
+
+    fclose(f);
+}
+
+// Chargement des infos visuelles pour l'affichage (statistiques simplifiées)
+void chargerAffichage(AffichagePerso aff[], Player persos[], int taille) {
+    for (int i = 0; i < taille; i++) {
+        char buffer[32];
+        snprintf(buffer, sizeof(buffer), "(%d)  %s", i + 1, persos[i].name);
+        aff[i].nom = strdup(buffer);
+
+        // Simplifie l'affichage à base d'échelles de 1 à 5
+        aff[i].pv = persos[i].stats.pv / 20;
+        aff[i].att = persos[i].stats.att;
+        aff[i].def = (int)(persos[i].stats.def * 10);
+        aff[i].speed = persos[i].stats.speed;
+        aff[i].dodge = (int)(persos[i].stats.dodge * 10);
+        aff[i].crit = 3; // Valeur par défaut
+    }
+}
