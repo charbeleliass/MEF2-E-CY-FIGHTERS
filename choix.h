@@ -9,7 +9,7 @@
 #define RESET   "\033[0m"
 
 int demanderChoixDansIntervalle(const char *texte, int min, int max, const char *couleur);
-void choix_joueur_E(int *equipe, int nbr_joueur);
-void choix_joueur(int *equipe1, int *equipe2, int nbr_joueur , int mode);
+void choix_joueur_E(int *equipe, int nbr_joueur, AffichagePerso persos_affichage[]);
+void choix_joueur(int *equipe1, int *equipe2, int nbr_joueur , int mode, AffichagePerso persos_affichage[]);
 
 #endif
