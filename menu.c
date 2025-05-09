@@ -64,7 +64,7 @@ void afficherBarre(int valeur) {
     printf(" ");
 }
 
-void afficherPersonnage(int x) {
+void afficherPersonnage(int x, AffichagePerso persos_affichage[]) {
     AffichagePerso p = persos_affichage[x];
 
     printf(ROUGE"[%-17s]"RESET, p.nom );
@@ -77,14 +77,14 @@ void afficherPersonnage(int x) {
     printf("\n");
 }
 
-void afficherTousLesPersos() {
+void afficherTousLesPersos(AffichagePerso persos_affichage[]) {
     system("clear");
     printf(BLEU "+=====================================================================================================================+\n");
     printf("║                                            👥  PERSONNAGES DISPONIBLES 👥                                             ║\n");
     printf("+=====================================================================================================================+\n\n" RESET);
 
     for (int i = 0; i < 12; i++) {
-        afficherPersonnage(i);
+        afficherPersonnage(i, persos_affichage);
     }
 
     printf("Appuie sur Entrée pour continuer...");
