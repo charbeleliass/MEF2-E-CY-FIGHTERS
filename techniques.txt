@@ -1,1 +1,13 @@
-
+nom;valeur;effet;description;tours_actifs;recharge
+Gum Gum no Gum Gum;1.2;aoe;"Inflige des dégâts à toute l'équipe adverse";0;3
+Diabolo Jumbo;0.2;pv+;"Augmente les PV du lanceur de 20%";0;3
+Tiger Slash;0.0;dodge++;"Permet d'esquiver tous les dégâts pendant 2 tours";2;4
+Flame Fence;0.0;skip_enemy;"Empêche l'ennemi de jouer pendant 2 tours";2;4
+Song Slash;0.25;team_def+;"Augmente la défense de l'équipe de 25% pendant 3 tours";3;4
+Skull Bomb Blast;1.1;aoe;"Inflige des dégâts modérés à tous les ennemis";0;3
+Fallbright;0.2;def--;"Réduit la défense d’un ennemi pendant 2 tours";2;3
+Master Cannon;0.3;team_pv+;"Soigne toute l’équipe de 30% de leurs PV";0;4
+Mochi Hadan;0.15;crit+;"Augmente les chances de coup critique pendant 3 tours";3;3
+Black Hole;0.25;def--;"Affaiblit fortement la défense de l’équipe ennemie";2;4
+Desert Spada;0.2;dot;"Inflige des dégâts sur la durée pendant 3 tours";3;4
+Thunder;1.4;aoe;"Frappe tous les ennemis avec une puissance foudroyante";0;3
