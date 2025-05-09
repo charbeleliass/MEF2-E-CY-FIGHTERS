@@ -44,6 +44,7 @@ typedef struct {
     int tour_actif;
     int recharge;
     Effect buff;
+    char effet_type[20]; 
 } Special;
 
 typedef struct {
@@ -54,7 +55,11 @@ typedef struct {
     int tour_buff_restant;
 } Player;
 
-extern Player p[12];
-extern AffichagePerso persos_affichage[12];
+Player initialiserJoueur(int index);
+AffichagePerso getAffichagePerso(int index);
+
+void chargerPersonnages(Player persos[], int taille);
+void chargerTechniques(Player persos[], int taille);
+void chargerAffichage(AffichagePerso aff[], Player persos[], int taille);
 
 #endif
