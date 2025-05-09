@@ -7,8 +7,8 @@
 
 void afficherTitre();
 void afficherMenu(int *mode , int *nbr_joueur);
-void afficherTousLesPersos();
+void afficherTousLesPersos(AffichagePerso persos_affichage[]);
 void afficherBarre(int valeur);
-void afficherPersonnage(int x);
+void afficherPersonnage(int x, AffichagePerso persos_affichage[]);
 
 #endif
