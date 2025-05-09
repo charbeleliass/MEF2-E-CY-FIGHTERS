@@ -18,8 +18,8 @@ int demanderChoixDansIntervalle(const char *texte, int min, int max, const char 
     } while (1);
 }
 
-void choix_joueur_E(int *equipe, int nbr_joueur) {
-    int x = -1 , y =-1 ;
+void choix_joueur_E(int *equipe, int nbr_joueur, AffichagePerso persos_affichage[]) {
+    int x = -1, y = -1;
     for (int i = 0; i <= nbr_joueur; i++) {
         switch(i) {
             case 0:
@@ -29,14 +29,14 @@ void choix_joueur_E(int *equipe, int nbr_joueur) {
             case 1:
                 equipe[i] = demanderChoixDansIntervalle("👉 Choisis le deuxième Personnage",  1, 12 , JAUNE);
                 while(equipe[i] == x){
-                    equipe[i] = demanderChoixDansIntervalle(" Vous ne pouvez pas choisir deux fois le meme personnage",  1, 12 , ROUGE);
+                    equipe[i] = demanderChoixDansIntervalle(" Vous ne pouvez pas choisir deux fois le même personnage",  1, 12 , ROUGE);
                 }
                 y = equipe[i];
                 break;
             case 2:
                 equipe[i] = demanderChoixDansIntervalle("👉 Choisis le troisième Personnage", 1, 12 , JAUNE);
                 while(equipe[i] == x || equipe[i] == y){
-                    equipe[i] = demanderChoixDansIntervalle(" Vous ne pouvez pas choisir deux fois le meme personnage",  1, 12 , ROUGE);
+                    equipe[i] = demanderChoixDansIntervalle(" Vous ne pouvez pas choisir deux fois le même personnage",  1, 12 , ROUGE);
                 }
                 break;
             default:
@@ -48,17 +48,17 @@ void choix_joueur_E(int *equipe, int nbr_joueur) {
     }
 }
 
-void choix_joueur(int *equipe1, int *equipe2, int nbr_joueur , int mode) {
+void choix_joueur(int *equipe1, int *equipe2, int nbr_joueur , int mode, AffichagePerso persos_affichage[]) {
     switch(mode){
         case 1:
             printf("\n👥  EQUIPE 1, c’est à votre tour :\n");
-            choix_joueur_E(equipe1, nbr_joueur);
+            choix_joueur_E(equipe1, nbr_joueur, persos_affichage);
             printf("\n👥  EQUIPE 2, c’est à votre tour :\n");
-            choix_joueur_E(equipe2, nbr_joueur);
+            choix_joueur_E(equipe2, nbr_joueur, persos_affichage);
             break;
         case 2:
             printf("\n👥  EQUIPE 1, c’est à votre tour :\n");
-            choix_joueur_E(equipe1, nbr_joueur);
+            choix_joueur_E(equipe1, nbr_joueur, persos_affichage);
             break;
         default:
             printf("Erreur : mode non supporté\n");
