@@ -39,7 +39,6 @@ void chargerPersonnages(Player persos[], int taille) {
     fclose(f);
 }
 
-// Chargement des techniques depuis techniques.txt
 void chargerTechniques(Player persos[], int taille) {
     FILE *f = fopen("techniques.txt", "r");
     if (!f) {
@@ -62,16 +61,14 @@ void chargerTechniques(Player persos[], int taille) {
             persos[i].atk_spe.valeur = valeur;
             strncpy(persos[i].atk_spe.description, description, sizeof(persos[i].atk_spe.description));
             persos[i].atk_spe.tour_actif = tours;
-            persos[i].atk_spe.recharge = recharge;
-
-            // Stocke le type d'effet sous forme de chaîne (ex: "pv+", "aoe", etc.)
+            persos[i].atk_spe.recharge = 0; // toujours 0 au début
+            persos[i].atk_spe.recharge_max = recharge;
             strncpy(persos[i].atk_spe.effet_type, effet, sizeof(persos[i].atk_spe.effet_type));
         }
     }
 
     fclose(f);
 }
-
 // Chargement des infos visuelles pour l'affichage (statistiques simplifiées)
 void chargerAffichage(AffichagePerso aff[], Player persos[], int taille) {
     for (int i = 0; i < taille; i++) {
