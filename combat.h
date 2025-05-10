@@ -15,7 +15,7 @@ void afficher_emojis_effets(Player p);
 void afficher_etat_combat(Player eq1[], Player eq2[], int joueur_actuel, int equipe_joueur, int nbr_joueur);
 
 void attaque_classique(Player* attaquant, Player ennemis[], int nbr_joueur);
-void utiliser_competence(Player* lanceur, Player ennemis[], int nbr_joueur);
+void utiliser_competence(Player* lanceur, Player equipe[], Player ennemis[], int nbr_joueur);
 
 void update_competence(Player* p);
 void update_effets(Player* p);
