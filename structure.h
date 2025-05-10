@@ -43,8 +43,9 @@ typedef struct {
     char description[200];
     int tour_actif;
     int recharge;
+    int recharge_max;           // Valeur de recharge fixe pour la compétence
     Effect buff;
-    char effet_type[20]; 
+    char effet_type[20];
 } Special;
 
 typedef struct {
