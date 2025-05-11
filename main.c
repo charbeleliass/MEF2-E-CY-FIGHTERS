@@ -4,11 +4,12 @@
 #include "structure.h"
 #include "choix.h"
 #include "combat.h"
+#include "computer.h"
 
 #define NB_PERSOS 12
 
 int main() {
-    int mode = 0, nbr_joueur = 0;
+    int mode = 0, nbr_joueur = 0, difficulte = 1;
     int equipe1[3], equipe2[3];
 
     Player persos[NB_PERSOS];
@@ -23,7 +24,13 @@ int main() {
     afficherTitre();
     afficherMenu(&mode, &nbr_joueur);
     afficherTousLesPersos(affichage);
-    choix_joueur(equipe1, equipe2, nbr_joueur, mode, affichage);
+
+    if (mode == 1) {
+        choix_joueur(equipe1, equipe2, nbr_joueur, mode, affichage);
+    } else {
+        choix_joueur_E(equipe1, nbr_joueur, affichage);
+        choix_ordi_persos(equipe2, nbr_joueur);
+    }
 
     // Préparation des équipes
     Player eq1_stats[nbr_joueur + 1];
@@ -34,8 +41,22 @@ int main() {
     }
 
     // Choix d’assets (armes) + Combat
-    choix_assets_E(equipe1, equipe2, nbr_joueur, eq1_stats, eq2_stats, affichage);
-    combat(eq1_stats, eq2_stats, nbr_joueur, affichage);
+    if (mode == 1)
+        choix_assets_E(equipe1, equipe2, nbr_joueur, eq1_stats, eq2_stats, affichage);
+    else {
+        afficher_stats();
+        choix_assets(equipe1, nbr_joueur, eq1_stats, affichage);
+        attendreEntree();
+        choix_ordi_assets(equipe2, nbr_joueur, eq2_stats, affichage);
+        attendreEntree();
 
+        printf("\n+================ DIFFICULTÉ ================+\n");
+        printf("1. Noob    (attaque aléatoire)\n");
+        printf("2. Facile  (attaque le plus faible)\n");
+        printf("3. Moyen   (utilise les compétences intelligemment)\n\n");
+        difficulte = demanderChoixDansIntervalle("Choisis la difficulté", 1, 3, JAUNE);
+    }
+
+    combat(eq1_stats, eq2_stats, nbr_joueur, affichage, mode, difficulte);
     return 0;
 }
