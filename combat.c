@@ -92,6 +92,7 @@ void afficher_emojis_effets(Player p) {
         else if (strcmp(effet, "att+") == 0) printf("✊ ");
         else if (strcmp(effet, "speed+") == 0) printf("➡️ ");
         else if (strcmp(effet, "pv_max_temp") == 0) printf("🔺 ");
+        else if (strcmp(effet, "debuff_hit") == 0) printf("☠️ ");
         else printf("✨ ");
     }
 }
@@ -126,6 +127,16 @@ void afficher_etat_combat(Player eq1[], Player eq2[], int joueur_actuel, int equ
     }
     printf("\n");
 
+    for (int i = 0; i <= nbr_joueur; i++) {
+        if (eq1[i].stats_temp.pv > 0) {
+            int pct = (eq1[i].barre_vitesse * 100) / 1000;
+            printf("Progression : %3d%%   ", pct);
+        } else {
+            printf("                ");
+        }
+    }
+    printf("\n");
+
     printf(BLEU "_[EQUIPE 2]_____________________________________________________________\n" RESET);
     for (int i = 0; i <= nbr_joueur; i++) {
         if (eq2[i].stats_temp.pv <= 0)
@@ -151,8 +162,25 @@ void afficher_etat_combat(Player eq1[], Player eq2[], int joueur_actuel, int equ
         afficher_emojis_effets(eq2[i]);
         printf(" ]");
     }
+    printf("\n");
+
+    for (int i = 0; i <= nbr_joueur; i++) {
+        if (eq2[i].stats_temp.pv > 0) {
+            int pct = (eq2[i].barre_vitesse * 100) / 1000;
+            printf("Progression : %3d%%   ", pct);
+        } else {
+            printf("                ");
+        }
+    }
     printf("\n\n");
 }
+int equipe_KO(Player equipe[], int nbr_joueur) {
+    for (int i = 0; i <= nbr_joueur; i++)
+        if (equipe[i].stats_temp.pv > 0)
+            return 0;
+    return 1;
+}
+
 void update_competence(Player* p) {
     if (p->atk_spe.recharge > 0)
         p->atk_spe.recharge--;
@@ -161,89 +189,36 @@ void update_competence(Player* p) {
 void update_effets(Player* p) {
     if (p->tour_buff_restant > 0) {
         p->tour_buff_restant--;
-
         if (p->tour_buff_restant == 0) {
-            if (strcmp(p->atk_spe.effet_type, "att+") == 0)
-                p->stats_temp.att = p->stats.att;
-            else if (strcmp(p->atk_spe.effet_type, "speed+") == 0)
-                p->stats_temp.speed = p->stats.speed;
-            else if (strcmp(p->atk_spe.effet_type, "team_def+") == 0 ||
-                     strcmp(p->atk_spe.effet_type, "def--") == 0)
-                p->stats_temp.def = p->stats.def;
+            p->stats_temp = p->stats;
         }
     }
 }
 
-int equipe_KO(Player equipe[], int nbr_joueur) {
-    for (int i = 0; i <= nbr_joueur; i++)
-        if (equipe[i].stats_temp.pv > 0)
-            return 0;
-    return 1;
+int trouver_suivant_joueur(Player eq1[], Player eq2[], int taille) {
+    int total = 2 * (taille + 1);
+    int index = -1;
+    int max = -1;
+
+    for (int i = 0; i < total; i++) {
+        Player* p = (i < taille + 1) ? &eq1[i] : &eq2[i - (taille + 1)];
+        if (p->stats_temp.pv <= 0) continue;
+
+        p->barre_vitesse += p->stats_temp.speed;
+        if (p->barre_vitesse >= 1000 && p->barre_vitesse > max) {
+            max = p->barre_vitesse;
+            index = i;
+        }
+    }
+    return index;
 }
 
-void appliquer_effet(Player* lanceur, Player equipe[], Player ennemis[], int nbr_joueur) {
-    char* effet = lanceur->atk_spe.effet_type;
-    float val = lanceur->atk_spe.valeur;
-    int duree = lanceur->atk_spe.tour_actif;
-
-    if (strcmp(effet, "aoe") == 0) {
-        for (int i = 0; i <= nbr_joueur; i++) {
-            if (ennemis[i].stats_temp.pv > 0)
-                ennemis[i].stats_temp.pv -= lanceur->stats_temp.att * val * 5;
-        }
-
-    } else if (strcmp(effet, "pv+") == 0) {
-        lanceur->stats_temp.pv += lanceur->stats_temp.pv * val;
-        if (lanceur->stats_temp.pv > lanceur->stats.pv_max)
-            lanceur->stats_temp.pv = lanceur->stats.pv_max;
-
-    } else if (strcmp(effet, "team_pv+") == 0) {
-        for (int i = 0; i <= nbr_joueur; i++) {
-            float heal = equipe[i].stats.pv_max * val;
-            equipe[i].stats_temp.pv += heal;
-            if (equipe[i].stats_temp.pv > equipe[i].stats.pv_max)
-                equipe[i].stats_temp.pv = equipe[i].stats.pv_max;
-        }
-
-    } else if (strcmp(effet, "team_def+") == 0) {
-        for (int i = 0; i <= nbr_joueur; i++)
-            equipe[i].stats_temp.def += val;
-        lanceur->tour_buff_restant = duree;
-
-    } else if (strcmp(effet, "def--") == 0) {
-        for (int i = 0; i <= nbr_joueur; i++) {
-            ennemis[i].stats_temp.def -= val;
-            if (ennemis[i].stats_temp.def < 0) ennemis[i].stats_temp.def = 0;
-        }
-        lanceur->tour_buff_restant = duree;
-
-    } else if (strcmp(effet, "dodge++") == 0) {
-        lanceur->tour_buff_restant = duree;
-
-    } else if (strcmp(effet, "att+") == 0) {
-        lanceur->stats_temp.att += lanceur->stats.att * val;
-        lanceur->tour_buff_restant = duree;
-
-    } else if (strcmp(effet, "speed+") == 0) {
-        lanceur->stats_temp.speed += lanceur->stats.speed * val;
-        lanceur->tour_buff_restant = duree;
-
-    } else if (strcmp(effet, "pv_max_temp") == 0) {
-        lanceur->stats_temp.pv = lanceur->stats.pv_max;
-    } else if (strcmp(effet, "debuff_hit") == 0) {
-        int cible = demanderChoixDansIntervalle("Choisis une cible :", 1, nbr_joueur + 1, BLEU) - 1;
-        float degats = lanceur->stats_temp.att * val * 5;
-        ennemis[cible].stats_temp.pv -= degats;
-        ennemis[cible].stats_temp.def -= 0.2;
-        if (ennemis[cible].stats_temp.def < 0) ennemis[cible].stats_temp.def = 0;
-        printf("%s inflige %.1f dégâts à %s et réduit sa défense !\n", lanceur->name, degats, ennemis[cible].name);
-        attendreEntree();
-    }
+void reset_barre(Player* p) {
+    p->barre_vitesse = 0;
 }
 
 void attaque_classique(Player* attaquant, Player ennemis[], int nbr_joueur) {
     int cible = demanderChoixDansIntervalle("Choisir la cible :", 1, nbr_joueur + 1, BLEU) - 1;
-
     if (ennemis[cible].stats_temp.pv <= 0) {
         printf("Cible déjà K.O. !\n");
         attendreEntree();
@@ -272,6 +247,66 @@ void attaque_classique(Player* attaquant, Player ennemis[], int nbr_joueur) {
     attendreEntree();
 }
 
+void appliquer_effet(Player* lanceur, Player equipe[], Player ennemis[], int nbr_joueur) {
+    char* effet = lanceur->atk_spe.effet_type;
+    float val = lanceur->atk_spe.valeur;
+    int duree = lanceur->atk_spe.tour_actif;
+
+    if (strcmp(effet, "aoe") == 0) {
+        for (int i = 0; i <= nbr_joueur; i++) {
+            if (ennemis[i].stats_temp.pv > 0)
+                ennemis[i].stats_temp.pv -= lanceur->stats_temp.att * val * 5;
+        }
+
+    } else if (strcmp(effet, "pv+") == 0) {
+        lanceur->stats_temp.pv += lanceur->stats_temp.pv * val;
+        if (lanceur->stats_temp.pv > lanceur->stats.pv_max)
+            lanceur->stats_temp.pv = lanceur->stats.pv_max;
+
+    } else if (strcmp(effet, "pv_max_temp") == 0) {
+        lanceur->stats_temp.pv = lanceur->stats.pv_max;
+
+    } else if (strcmp(effet, "team_pv+") == 0) {
+        for (int i = 0; i <= nbr_joueur; i++) {
+            if (equipe[i].stats_temp.pv <= 0) {
+                equipe[i].stats_temp.pv = 10;
+            } else {
+                equipe[i].stats_temp.pv += equipe[i].stats.pv_max * val;
+                if (equipe[i].stats_temp.pv > equipe[i].stats.pv_max)
+                    equipe[i].stats_temp.pv = equipe[i].stats.pv_max;
+            }
+        }
+
+    } else if (strcmp(effet, "team_def+") == 0) {
+        for (int i = 0; i <= nbr_joueur; i++)
+            equipe[i].stats_temp.def += val;
+        lanceur->tour_buff_restant = duree;
+
+    } else if (strcmp(effet, "def--") == 0) {
+        for (int i = 0; i <= nbr_joueur; i++) {
+            ennemis[i].stats_temp.def -= val;
+            if (ennemis[i].stats_temp.def < 0) ennemis[i].stats_temp.def = 0;
+        }
+        lanceur->tour_buff_restant = duree;
+
+    } else if (strcmp(effet, "att+") == 0) {
+        lanceur->stats_temp.att += lanceur->stats.att * val;
+        lanceur->tour_buff_restant = duree;
+
+    } else if (strcmp(effet, "dodge++") == 0) {
+        lanceur->tour_buff_restant = duree;
+
+    } else if (strcmp(effet, "debuff_hit") == 0) {
+        int cible = demanderChoixDansIntervalle("Choisir la cible :", 1, nbr_joueur + 1, BLEU) - 1;
+        if (ennemis[cible].stats_temp.pv > 0) {
+            ennemis[cible].stats_temp.pv -= lanceur->stats_temp.att * val * 5;
+            ennemis[cible].stats_temp.def -= 0.25;
+            if (ennemis[cible].stats_temp.def < 0) ennemis[cible].stats_temp.def = 0;
+            lanceur->tour_buff_restant = duree;
+        }
+    }
+}
+
 void utiliser_competence(Player* lanceur, Player equipe[], Player ennemis[], int nbr_joueur) {
     if (lanceur->atk_spe.recharge > 0) {
         printf(ROUGE "✖ Compétence non rechargée (%d tour(s) restant)\n" RESET, lanceur->atk_spe.recharge);
@@ -281,57 +316,58 @@ void utiliser_competence(Player* lanceur, Player equipe[], Player ennemis[], int
 
     printf("%s utilise %s !\n", lanceur->name, lanceur->atk_spe.name);
     printf("⌀ %s\n", lanceur->atk_spe.description);
-
     appliquer_effet(lanceur, equipe, ennemis, nbr_joueur);
     lanceur->atk_spe.recharge = lanceur->atk_spe.recharge_max;
+    attendreEntree();
 }
 
-void combat(Player eq1_stats[], Player eq2_stats[], int nbr_joueur, AffichagePerso affichage[]) {
+void combat(Player eq1[], Player eq2[], int nbr_joueur, AffichagePerso affichage[]) {
     srand(time(NULL));
-    int tour = 1;
-    int arreter = 0;
 
-    while (!arreter) {
-        printf("\n========== TOUR %d ==========\n", tour);
+    for (int i = 0; i <= nbr_joueur; i++) {
+        eq1[i].barre_vitesse = 0;
+        eq2[i].barre_vitesse = 0;
+    }
 
-        for (int e = 0; e <= 1; e++) {
-            Player* equipe = (e == 0) ? eq1_stats : eq2_stats;
-            Player* ennemis = (e == 0) ? eq2_stats : eq1_stats;
-
-            for (int i = 0; i <= nbr_joueur; i++) {
-                if (equipe[i].stats_temp.pv <= 0) continue;
-
-                if (equipe_KO(ennemis, nbr_joueur)) {
-                    printf("\n=== L'équipe %d est K.O. ===\nÉQUIPE %d GAGNE !\n", (e == 0) ? 2 : 1, (e == 0) ? 1 : 2);
-                    arreter = 1;
-                    break;
-                }
-
-                afficher_etat_combat(eq1_stats, eq2_stats, i, e, nbr_joueur);
-                printf("\nC'est au tour de %s\n", equipe[i].name);
-
-                printf("1 - Attaque classique\n");
-                Special spe = equipe[i].atk_spe;
-                printf("2 - %s ", spe.name);
-                if (spe.recharge > 0)
-                    printf("(Recharge: %d tour(s) restant)\n", spe.recharge);
-                else
-                    printf("(Disponible)\n");
-
-                printf("   ⌀ %s\n", spe.description);
-                int choix = demanderChoixDansIntervalle("Que veux-tu faire ?", 1, 2, JAUNE);
-
-                if (choix == 1)
-                    attaque_classique(&equipe[i], ennemis, nbr_joueur);
-                else
-                    utiliser_competence(&equipe[i], equipe, ennemis, nbr_joueur);
-
-                update_competence(&equipe[i]);
-                update_effets(&equipe[i]);
-            }
-
-            if (arreter) break;
+    while (1) {
+        if (equipe_KO(eq1, nbr_joueur)) {
+            printf(ROUGE "\n=== L'ÉQUIPE 1 EST K.O. ===\nÉQUIPE 2 GAGNE !\n" RESET);
+            break;
+        }
+        if (equipe_KO(eq2, nbr_joueur)) {
+            printf(ROUGE "\n=== L'ÉQUIPE 2 EST K.O. ===\nÉQUIPE 1 GAGNE !\n" RESET);
+            break;
         }
 
-        tour++;
+        int index = trouver_suivant_joueur(eq1, eq2, nbr_joueur);
+        if (index == -1) continue;
+
+        Player* joueur = (index <= nbr_joueur) ? &eq1[index] : &eq2[index - nbr_joueur - 1];
+        Player* equipe = (index <= nbr_joueur) ? eq1 : eq2;
+        Player* ennemis = (index <= nbr_joueur) ? eq2 : eq1;
+        int equipe_num = (index <= nbr_joueur) ? 0 : 1;
+        int joueur_index = (index <= nbr_joueur) ? index : index - nbr_joueur - 1;
+
+        reset_barre(joueur);
+        update_competence(joueur);
+        update_effets(joueur);
+
+        afficher_etat_combat(eq1, eq2, joueur_index, equipe_num, nbr_joueur);
+        printf("\nC'est au tour de %s\n", joueur->name);
+
+        printf("1 - Attaque classique\n");
+        printf("2 - %s ", joueur->atk_spe.name);
+        if (joueur->atk_spe.recharge > 0)
+            printf("(Recharge: %d tour(s) restant)\n", joueur->atk_spe.recharge);
+        else
+            printf("(Disponible)\n");
+
+        printf("   ⌀ %s\n", joueur->atk_spe.description);
+
+        int choix = demanderChoixDansIntervalle("Que veux-tu faire ?", 1, 2, JAUNE);
+        if (choix == 1)
+            attaque_classique(joueur, ennemis, nbr_joueur);
+        else
+            utiliser_competence(joueur, equipe, ennemis, nbr_joueur);
     }
+}
