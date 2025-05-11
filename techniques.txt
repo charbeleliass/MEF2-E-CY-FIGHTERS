@@ -5,7 +5,7 @@ Tiger Slash;0.0;dodge++;"Permet d'esquiver tous les dégâts pendant 2 tours";2;
 Flame Burst;1.4;aoe;"Frappe tous les ennemis avec des flammes intenses";0;3
 Song Slash;0.25;team_def+;"Augmente la défense de l'équipe de 25% pendant 3 tours";3;4
 Skull Bomb Blast;1.1;aoe;"Inflige des dégâts modérés à tous les ennemis";0;3
-Royal Heal;0.0;pv_max_temp;"Rend les PV du lanceur au maximum définitivement";0;4
+Royal Heal;0.0;pv_max_temp;"Rend les PV du lanceur au maximum définitivement";0;7
 Master Cannon;0.3;team_pv+;"Soigne toute l’équipe de 30% de leurs PV + reanime les morts ";0;5
 Rage Mochi;0.4;att+;"Augmente l'attaque de 40% pendant 2 tours";2;4
 Dark Gravity;0.2;def--;"Affaiblit la défense de toute l'équipe ennemie pendant 2 tours";2;4
