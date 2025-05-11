@@ -43,9 +43,9 @@ typedef struct {
     char description[200];
     int tour_actif;
     int recharge;
-    int recharge_max;           // Valeur de recharge fixe pour la compétence
+    int recharge_max;
     Effect buff;
-    char effet_type[20];
+    char effet_type[20]; 
 } Special;
 
 typedef struct {
@@ -54,6 +54,8 @@ typedef struct {
     Stats stats_temp;
     Special atk_spe;
     int tour_buff_restant;
+
+    float pv_temp_restore;  // pour le retour de PV après pv_max_temp (Doflamingo)
 } Player;
 
 Player initialiserJoueur(int index);
