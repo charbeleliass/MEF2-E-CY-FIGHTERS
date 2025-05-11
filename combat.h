@@ -15,12 +15,16 @@ void afficher_emojis_effets(Player p);
 void afficher_etat_combat(Player eq1[], Player eq2[], int joueur_actuel, int equipe_joueur, int nbr_joueur);
 
 void attaque_classique(Player* attaquant, Player ennemis[], int nbr_joueur);
+void attaque_classique_direct(Player* attaquant, Player* cible);
 void utiliser_competence(Player* lanceur, Player equipe[], Player ennemis[], int nbr_joueur);
+void appliquer_effet(Player* lanceur, Player equipe[], Player ennemis[], int nbr_joueur, int is_ordi);
 
 void update_competence(Player* p);
 void update_effets(Player* p);
 int equipe_KO(Player equipe[], int nbr_joueur);
 
-void combat(Player eq1_stats[], Player eq2_stats[], int nbr_joueur, AffichagePerso affichage[]);
+void attendreEntree();
+
+void combat(Player eq1_stats[], Player eq2_stats[], int nbr_joueur, AffichagePerso affichage[], int mode, int difficulte);
 
 #endif
