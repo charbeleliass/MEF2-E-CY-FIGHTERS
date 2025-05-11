@@ -81,15 +81,17 @@ void choix_assets_E(int equipe1[], int equipe2[], int nbr_joueur, Player eq1_sta
 }
 
 void afficher_emojis_effets(Player p) {
+    if (p.tour_buff_restant <= 0) return;
+
     char *effet = p.atk_spe.effet_type;
     for (int i = 0; i < p.tour_buff_restant; i++) {
         if (strcmp(effet, "pv+") == 0) printf("❤️ ");
         else if (strcmp(effet, "team_def+") == 0) printf("🛡️ ");
-        else if (strcmp(effet, "dodge++") == 0) printf("⚡ ");
-        else if (strcmp(effet, "dot") == 0) printf("☠️ ");
         else if (strcmp(effet, "def--") == 0) printf("⬇️ ");
-        else if (strcmp(effet, "crit+") == 0) printf("🔥 ");
+        else if (strcmp(effet, "dodge++") == 0) printf("⚡ ");
+        else if (strcmp(effet, "att+") == 0) printf("✊ ");
         else if (strcmp(effet, "speed+") == 0) printf("➡️ ");
+        else if (strcmp(effet, "pv_max_temp") == 0) printf("🔺 ");
         else printf("✨ ");
     }
 }
@@ -101,8 +103,16 @@ void update_competence(Player* p) {
 void update_effets(Player* p) {
     if (p->tour_buff_restant > 0) {
         p->tour_buff_restant--;
+
         if (p->tour_buff_restant == 0) {
-            p->stats_temp = p->stats;
+            if (strcmp(p->atk_spe.effet_type, "att+") == 0)
+                p->stats_temp.att = p->stats.att;
+            else if (strcmp(p->atk_spe.effet_type, "speed+") == 0)
+                p->stats_temp.speed = p->stats.speed;
+            else if (strcmp(p->atk_spe.effet_type, "pv_max_temp") == 0)
+                p->stats_temp.pv = p->pv_temp_restore;
+
+            p->stats_temp.def = p->stats.def;
         }
     }
 }
@@ -121,10 +131,8 @@ void appliquer_effet(Player* lanceur, Player equipe[], Player ennemis[], int nbr
 
     if (strcmp(effet, "aoe") == 0) {
         for (int i = 0; i <= nbr_joueur; i++) {
-            if (ennemis[i].stats_temp.pv > 0) {
-                float degats = lanceur->stats_temp.att * val * 5;
-                ennemis[i].stats_temp.pv -= degats;
-            }
+            if (ennemis[i].stats_temp.pv > 0)
+                ennemis[i].stats_temp.pv -= lanceur->stats_temp.att * val * 5;
         }
 
     } else if (strcmp(effet, "pv+") == 0) {
@@ -143,24 +151,40 @@ void appliquer_effet(Player* lanceur, Player equipe[], Player ennemis[], int nbr
     } else if (strcmp(effet, "team_def+") == 0) {
         for (int i = 0; i <= nbr_joueur; i++) {
             equipe[i].stats_temp.def += val;
-            equipe[i].tour_buff_restant = duree;
         }
+        lanceur->tour_buff_restant = duree;
 
     } else if (strcmp(effet, "def--") == 0) {
         for (int i = 0; i <= nbr_joueur; i++) {
             ennemis[i].stats_temp.def -= val;
             if (ennemis[i].stats_temp.def < 0) ennemis[i].stats_temp.def = 0;
-            ennemis[i].tour_buff_restant = duree;
         }
-
-    } else if (strcmp(effet, "dodge++") == 0 ||
-               strcmp(effet, "crit+") == 0 ||
-               strcmp(effet, "dot") == 0 ||
-               strcmp(effet, "speed+") == 0) {
         lanceur->tour_buff_restant = duree;
-        if (strcmp(effet, "speed+") == 0) {
-            lanceur->stats_temp.speed += val * 10; // exemple : 0.2 => +2 en vitesse
-        }
+
+    } else if (strcmp(effet, "dodge++") == 0) {
+        lanceur->tour_buff_restant = duree;
+
+    } else if (strcmp(effet, "att+") == 0) {
+        lanceur->stats_temp.att += lanceur->stats.att * val;
+        lanceur->tour_buff_restant = duree;
+
+    } else if (strcmp(effet, "speed+") == 0) {
+        lanceur->stats_temp.speed += lanceur->stats.speed * val;
+        lanceur->tour_buff_restant = duree;
+
+    } else if (strcmp(effet, "pv_max_temp") == 0) {
+        lanceur->pv_temp_restore = lanceur->stats_temp.pv;
+        lanceur->stats_temp.pv = lanceur->stats.pv_max;
+        lanceur->tour_buff_restant = duree;
+
+    } else if (strcmp(effet, "debuff_hit") == 0) {
+        int cible = demanderChoixDansIntervalle("Choisis une cible :", 1, nbr_joueur + 1, BLEU) - 1;
+        float degats = lanceur->stats_temp.att * val * 5;
+        ennemis[cible].stats_temp.pv -= degats;
+        ennemis[cible].stats_temp.def -= 0.2;
+        if (ennemis[cible].stats_temp.def < 0) ennemis[cible].stats_temp.def = 0;
+        printf("%s inflige %.1f dégâts à %s et réduit sa défense !\n", lanceur->name, degats, ennemis[cible].name);
+        attendreEntree();
     }
 }
 
@@ -207,65 +231,6 @@ void utiliser_competence(Player* lanceur, Player equipe[], Player ennemis[], int
 
     appliquer_effet(lanceur, equipe, ennemis, nbr_joueur);
     lanceur->atk_spe.recharge = lanceur->atk_spe.recharge_max;
-    attendreEntree();
-}
-
-void afficher_etat_combat(Player eq1[], Player eq2[], int joueur_actuel, int equipe_joueur, int nbr_joueur) {
-    system("clear");
-
-    printf(BLEU "_[EQUIPE 1]_____________________________________________________________\n" RESET);
-    for (int i = 0; i <= nbr_joueur; i++) {
-        if (eq1[i].stats_temp.pv <= 0)
-            printf("[ " ROUGE "%-10s |✠|" RESET "]", eq1[i].name);
-        else if (equipe_joueur == 0 && i == joueur_actuel)
-            printf("[ " JAUNE ")>%s<(" RESET "]", eq1[i].name);
-        else
-            printf("[ " VERT "%-10s |%d|" RESET "]", eq1[i].name, i+1);
-    }
-    printf("\n");
-
-    for (int i = 0; i <= nbr_joueur; i++) {
-        printf("[");
-        int pv_ratio = (int)((eq1[i].stats_temp.pv / eq1[i].stats.pv_max) * 20);
-        for (int j = 0; j < pv_ratio; j++) printf("#");
-        for (int j = pv_ratio; j < 20; j++) printf(" ");
-        printf("]");
-    }
-    printf("\n");
-
-    for (int i = 0; i <= nbr_joueur; i++) {
-        printf("[ ");
-        afficher_emojis_effets(eq1[i]);
-        printf(" ]");
-    }
-    printf("\n");
-
-    printf(BLEU "_[EQUIPE 2]_____________________________________________________________\n" RESET);
-    for (int i = 0; i <= nbr_joueur; i++) {
-        if (eq2[i].stats_temp.pv <= 0)
-            printf("[ " ROUGE "%-10s |✠|" RESET "]", eq2[i].name);
-        else if (equipe_joueur == 1 && i == joueur_actuel)
-            printf("[ " JAUNE ")>%s<(" RESET "]", eq2[i].name);
-        else
-            printf("[ " VERT "%-10s |%d|" RESET "]", eq2[i].name, i+1);
-    }
-    printf("\n");
-
-    for (int i = 0; i <= nbr_joueur; i++) {
-        printf("[");
-        int pv_ratio = (int)((eq2[i].stats_temp.pv / eq2[i].stats.pv_max) * 20);
-        for (int j = 0; j < pv_ratio; j++) printf("#");
-        for (int j = pv_ratio; j < 20; j++) printf(" ");
-        printf("]");
-    }
-    printf("\n");
-
-    for (int i = 0; i <= nbr_joueur; i++) {
-        printf("[ ");
-        afficher_emojis_effets(eq2[i]);
-        printf(" ]");
-    }
-    printf("\n\n");
 }
 
 void combat(Player eq1_stats[], Player eq2_stats[], int nbr_joueur, AffichagePerso affichage[]) {
