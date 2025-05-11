@@ -54,8 +54,7 @@ typedef struct {
     Stats stats_temp;
     Special atk_spe;
     int tour_buff_restant;
-
-    float pv_temp_restore;  // pour le retour de PV après pv_max_temp (Doflamingo)
+    int barre_vitesse;
 } Player;
 
 Player initialiserJoueur(int index);
